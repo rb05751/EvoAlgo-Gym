@@ -18,7 +18,8 @@ env_details = {
                                G=20,
                                N=10,
                                K=5,
-                               NUM_EPS_PER_EVAL=3),
+                               NUM_EPS_PER_EVAL=3,
+                               ENV_NAME='CartPole-v1'),
         env_model=Model,
         env_evolver=Evolver),
     "LunarLander-v2": dict(
@@ -27,7 +28,8 @@ env_details = {
                                G=300,
                                N=20,
                                K=10,
-                               NUM_EPS_PER_EVAL=5),
+                               NUM_EPS_PER_EVAL=5,
+                               ENV_NAME="LunarLander-v2"),
         env_model=Model,
         env_evolver=Evolver),
     "MountainCar-v0": dict(
@@ -36,16 +38,18 @@ env_details = {
                                G=100,
                                N=20,
                                K=10,
-                               NUM_EPS_PER_EVAL=5),
+                               NUM_EPS_PER_EVAL=5,
+                               ENV_NAME="MountainCar-v0"),
         env_model=Model,
         env_evolver=Evolver),
     "Pendulum-v1": dict(
-        env_config_params=dict(OBS_DIM=2,
-                               ACTION_DIM=3,
+        env_config_params=dict(OBS_DIM=3,
+                               ACTION_DIM=5,
                                G=100,
                                N=20,
                                K=10,
-                               NUM_EPS_PER_EVAL=5),
+                               NUM_EPS_PER_EVAL=5,
+                               ENV_NAME="Pendulum-v1"),
         env_model=PendulumV1Model,
         env_evolver=Evolver),
     'BipedalWalker-v3': dict(
@@ -54,7 +58,8 @@ env_details = {
                                G=200,
                                N=10,
                                K=5,
-                               NUM_EPS_PER_EVAL=3),
+                               NUM_EPS_PER_EVAL=3,
+                               ENV_NAME='BipedalWalker-v3'),
         env_model=BipedalWalkerModel,
         env_evolver=Evolver),
     'FrozenLake-v1-8x8': dict(
@@ -63,7 +68,8 @@ env_details = {
                                G=300,
                                N=20,
                                K=5,
-                               NUM_EPS_PER_EVAL=1),
+                               NUM_EPS_PER_EVAL=1,
+                               ENV_NAME='FrozenLake-v1'),
         env_model=Model,
         env_evolver=FrozenLakeEvolver),
     'FrozenLake-v1-4x4': dict(
@@ -72,7 +78,8 @@ env_details = {
                                G=300,
                                N=20,
                                K=5,
-                               NUM_EPS_PER_EVAL=1),
+                               NUM_EPS_PER_EVAL=1,
+                               ENV_NAME='FrozenLake-v1'),
         env_model=Model,
         env_evolver=FrozenLakeEvolver),
     'Cliffwalking-v0': dict(
@@ -81,7 +88,8 @@ env_details = {
                                G=100,
                                N=20,
                                K=5,
-                               NUM_EPS_PER_EVAL=1),
+                               NUM_EPS_PER_EVAL=1,
+                               ENV_NAME='Cliffwalking-v0'),
         env_model=Model,
         env_evolver=FrozenLakeEvolver)
 }

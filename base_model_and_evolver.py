@@ -46,12 +46,17 @@ class Evolver:
         num_timesteps = 0
 
         while not terminated and not truncated:
-            action, probs = model.take_action(observation)
-            observation, reward, terminated, truncated, info = env.step(action)
+            try:
+                action, probs = model.take_action(observation)
 
-            episode_reward += float(reward)
+                observation, reward, terminated, truncated, info = env.step(action)
 
-            num_timesteps += 1
+                episode_reward += float(reward)
+
+                num_timesteps += 1
+            except Exception as e:
+                print(f"Failed on this action: {action} because {e}")
+                break
 
         env.close()
 
@@ -83,7 +88,7 @@ class Evolver:
             weights = randomly_selected_model.weights + mutation_weights
 
             # append new offspring
-            offspring = Model(weights)
+            offspring = self.model(weights)
             next_gen.append(offspring)
 
         next_gen.extend(most_fit_models)  # letting most fit models survive to next generation
