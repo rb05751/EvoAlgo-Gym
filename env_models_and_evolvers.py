@@ -1,5 +1,8 @@
 from base_model_and_evolver import Model, Evolver
 import numpy as np
+from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor
+import time
 
 class BipedalWalkerModel(Model):
     def take_action(self, observation):
@@ -67,6 +70,49 @@ class CliffWalkingEvolver(Evolver):
 
         return episode_reward
 
+    def evolve(self):
+        pop = [self.model(
+            weights=np.random.uniform(-1, 1, (self.config_params['OBS_DIM'], self.config_params['ACTION_DIM']))
+            ) for _ in range(self.config_params['N'])]
+        best_models = []
+
+        for i in range(self.config_params['G']):
+            start = time.time()
+
+            # 1. Evaluate each model on task, calculating average reward over episodes
+            with Pool() as pool:
+                models_with_args = [(model, self.config_params['NUM_EPS_PER_EVAL'], self.config_params['ENV_NAME'], i)
+                                    for
+                                    i, model in enumerate(pop)]
+                results = pool.map(self.evaluate_model, models_with_args)
+
+                for model_index, avg_reward, std_reward in results:
+                    pop[model_index].avg_reward = avg_reward
+                    pop[model_index].std_reward = std_reward
+
+            # 2. Pick the top K models to reproduce
+            most_fit_models = list(sorted(pop, key=lambda x: x.avg_reward - x.std_reward, reverse=True))[
+                              :self.config_params['K']]
+
+            # 3. Create next generation of models
+            next_gen = self.create_next_generation(most_fit_models, self.config_params['N'],
+                                                   self.config_params['OBS_DIM'],
+                                                   self.config_params['ACTION_DIM'])
+
+            # 4. Set pop equal to new generation and start over
+            best_model = Model(weights=most_fit_models[0].weights)
+            best_model.avg_reward = most_fit_models[0].avg_reward
+            best_model.std_reward = most_fit_models[0].std_reward
+            best_models.append(best_model)
+
+            pop = next_gen
+
+            print(
+                f"Best model at end of generation {i + 1}: ({best_models[-1].avg_reward},{best_models[-1].std_reward}): "
+                f"Wall-Clock(s) = {time.time() - start}")
+
+        return best_models
+
 class FrozenLakeEvolver(Evolver):
 
     def evaluate_episode(self, model, env_name):
@@ -109,3 +155,46 @@ class FrozenLakeEvolver(Evolver):
         # print(end, dist_to_goal, max_dist, observation)
 
         return episode_reward
+
+    def evolve(self):
+        pop = [self.model(
+            weights=np.random.uniform(-1, 1, (64, 4))
+            ) for _ in range(self.config_params['N'])]
+        best_models = []
+
+        for i in range(self.config_params['G']):
+            start = time.time()
+
+            # 1. Evaluate each model on task, calculating average reward over episodes
+            with Pool() as pool:
+                models_with_args = [(model, self.config_params['NUM_EPS_PER_EVAL'], self.config_params['ENV_NAME'], i)
+                                    for
+                                    i, model in enumerate(pop)]
+                results = pool.map(self.evaluate_model, models_with_args)
+
+                for model_index, avg_reward, std_reward in results:
+                    pop[model_index].avg_reward = avg_reward
+                    pop[model_index].std_reward = std_reward
+
+            # 2. Pick the top K models to reproduce
+            most_fit_models = list(sorted(pop, key=lambda x: x.avg_reward - x.std_reward, reverse=True))[
+                              :self.config_params['K']]
+
+            # 3. Create next generation of models
+            next_gen = self.create_next_generation(most_fit_models, self.config_params['N'],
+                                                   self.config_params['OBS_DIM'],
+                                                   self.config_params['ACTION_DIM'])
+
+            # 4. Set pop equal to new generation and start over
+            best_model = Model(weights=most_fit_models[0].weights)
+            best_model.avg_reward = most_fit_models[0].avg_reward
+            best_model.std_reward = most_fit_models[0].std_reward
+            best_models.append(best_model)
+
+            pop = next_gen
+
+            print(
+                f"Best model at end of generation {i + 1}: ({best_models[-1].avg_reward},{best_models[-1].std_reward}): "
+                f"Wall-Clock(s) = {time.time() - start}")
+
+        return best_models

@@ -3,7 +3,7 @@ import json
 
 
 if __name__ == '__main__':
-    for ENV_NAME in env_details.keys():
+    for ENV_NAME in list(env_details.keys())[6:]:
         print(f"Testing for {ENV_NAME}")
         config_params = env_details[ENV_NAME]
         config_params['env_config_params']['G'] = 10

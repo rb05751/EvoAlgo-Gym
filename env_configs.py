@@ -66,7 +66,7 @@ env_details = {
         env_config_params=dict(OBS_DIM=8,
                                ACTION_DIM=8,
                                G=300,
-                               N=20,
+                               N=10,
                                K=5,
                                NUM_EPS_PER_EVAL=1,
                                ENV_NAME='FrozenLake-v1'),
