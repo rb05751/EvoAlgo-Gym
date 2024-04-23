@@ -64,7 +64,7 @@ env_details = {
         env_evolver=Evolver),
     'FrozenLake-v1-8x8': dict(
         env_config_params=dict(OBS_DIM=8,
-                               ACTION_DIM=8,
+                               ACTION_DIM=4,
                                G=300,
                                N=10,
                                K=5,

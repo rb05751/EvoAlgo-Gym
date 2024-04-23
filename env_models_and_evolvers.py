@@ -3,6 +3,7 @@ import numpy as np
 from multiprocessing import Pool
 from concurrent.futures import ThreadPoolExecutor
 import time
+import random
 
 class BipedalWalkerModel(Model):
     def take_action(self, observation):
@@ -39,14 +40,14 @@ class CliffWalkingEvolver(Evolver):
         #### Only for Cliff Walking ###
         coord_map = {}
         for i in range(self.config_params['OBS_DIM']):
-            for j in range(self.config_params['ACTION_DIM']):
-                obs = i * self.config_params['ACTION_DIM'] + j
+            for j in range(self.config_params['OBS_DIM']):
+                obs = i * self.config_params['OBS_DIM'] + j
                 coord_map[obs] = [i, j]
         #### Only for Cliff Walking ###
 
         while not terminated and not truncated and num_timesteps < 100:
             #### Only for Cliff Walking ####
-            one_hot_array = [0] * (self.config_params['OBS_DIM']*self.config_params['ACTION_DIM'])
+            one_hot_array = [0] * (self.config_params['OBS_DIM']*self.config_params['OBS_DIM'])
             one_hot_array[observation] = 1
             observation = np.array(one_hot_array)
             #### Only for Cliff Walking ####
@@ -115,11 +116,31 @@ class CliffWalkingEvolver(Evolver):
 
 class FrozenLakeEvolver(Evolver):
 
+    def create_next_generation(self, most_fit_models, N, obs_dim, action_dim):
+        next_gen = []
+        for i in range(N // 2):
+            # Get model weights for weighted selection
+            rewards = [x.avg_reward - x.std_reward for x in most_fit_models]
+            model_weights = self.softmax(x=np.array(rewards))
+            randomly_selected_model = random.choices(most_fit_models, model_weights, k=1)[0]
+
+            # apply mutation
+            mutation_weights = np.random.normal(0, 1, (obs_dim*obs_dim, action_dim))
+            weights = randomly_selected_model.weights + mutation_weights
+
+            # append new offspring
+            offspring = self.model(weights)
+            next_gen.append(offspring)
+
+        next_gen.extend(most_fit_models)  # letting most fit models survive to next generation
+
+        return next_gen
+
     def evaluate_episode(self, model, env_name):
         import gymnasium as gym  # Import gym inside the function
 
         # This function will be executed in a separate thread for each episode.
-        env = gym.make(env_name, desc=None, map_name=f"{self.config_params['OBS_DIM']}x{self.config_params['ACTION_DIM']}",
+        env = gym.make(env_name, desc=None, map_name=f"{self.config_params['OBS_DIM']}x{self.config_params['OBS_DIM']}",
                        is_slippery=False, render_mode=None)
         # print(f"Evaluating episode for env: {env}")
         observation, info = env.reset()
@@ -130,12 +151,12 @@ class FrozenLakeEvolver(Evolver):
 
         coord_map = {}
         for i in range(self.config_params['OBS_DIM']):
-            for j in range(self.config_params['ACTION_DIM']):
-                obs = i * self.config_params['ACTION_DIM'] + j
+            for j in range(self.config_params['OBS_DIM']):
+                obs = i * self.config_params['OBS_DIM'] + j
                 coord_map[obs] = [i, j]
 
         while not terminated and not truncated:
-            one_hot_array = [0] * (self.config_params['ACTION_DIM']*self.config_params['OBS_DIM'])
+            one_hot_array = [0] * (self.config_params['OBS_DIM']*self.config_params['OBS_DIM'])
             one_hot_array[observation] = 1
             observation = np.array(one_hot_array)
 
@@ -158,7 +179,7 @@ class FrozenLakeEvolver(Evolver):
 
     def evolve(self):
         pop = [self.model(
-            weights=np.random.uniform(-1, 1, (64, 4))
+            weights=np.random.uniform(-1, 1, (self.config_params['OBS_DIM']*self.config_params['OBS_DIM'], self.config_params['ACTION_DIM']))
             ) for _ in range(self.config_params['N'])]
         best_models = []
 
