@@ -82,14 +82,14 @@ env_details = {
                                ENV_NAME='FrozenLake-v1'),
         env_model=Model,
         env_evolver=FrozenLakeEvolver),
-    'Cliffwalking-v0': dict(
-        env_config_params=dict(OBS_DIM=4,
-                               ACTION_DIM=12,
+    'CliffWalking-v0': dict(
+        env_config_params=dict(OBS_DIM=12,
+                               ACTION_DIM=4,
                                G=100,
-                               N=20,
+                               N=10,
                                K=5,
                                NUM_EPS_PER_EVAL=1,
-                               ENV_NAME='Cliffwalking-v0'),
+                               ENV_NAME='CliffWalking-v0'),
         env_model=Model,
-        env_evolver=FrozenLakeEvolver)
+        env_evolver=CliffWalkingEvolver)
 }

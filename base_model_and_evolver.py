@@ -65,6 +65,8 @@ class Evolver:
     def evaluate_model(self, args):
         model, num_episodes, env_name, model_index = args
 
+        print("Evaluating Model")
+
         with ThreadPoolExecutor() as executor:
             # print(f"Evaluating Model: {model_index}")
             future_to_episode = {executor.submit(self.evaluate_episode, model, env_name): i for i in
